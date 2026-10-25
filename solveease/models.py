@@ -1,7 +1,9 @@
 from __future__ import annotations
+
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from typing import Any, Optional
+
 
 @dataclass
 class Opportunity:
@@ -23,8 +25,23 @@ class Opportunity:
     evidence_status: str = "public_lead_unverified"
     state: str = "discovered"
     notes: str = ""
+
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
+
+
+@dataclass
+class ScreeningResult:
+    opportunity_id: str
+    inputs_valid: bool
+    expected_value_usd: Optional[float]
+    passed: bool
+    reason: str
+    screened_at: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
 
 def utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
