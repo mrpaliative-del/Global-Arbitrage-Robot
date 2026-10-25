@@ -12,9 +12,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parent
-SCANNER = (ROOT / os.environ.get(
-    "TASK_GAP_SCRIPT", "task_gap_hunter.py"
-)).resolve()
+SCANNER = ROOT / os.environ.get("TASK_GAP_SCRIPT", "run_scan.py")
 
 TOKEN = os.environ.get("SOLVEEASE_RUN_TOKEN", "").strip()
 PORT = int(os.environ.get("PORT", "10000"))
