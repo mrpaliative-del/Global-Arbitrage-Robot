@@ -1,3 +1,7 @@
-# Runtime uses only the Python standard library.
-# Optional development dependency:
+SolveEase Global Arbitrage Robot v1.0.0
+
+Runtime uses Python standard library only.
+
+Install pytest for automated tests.
+
 pytest>=8.0
