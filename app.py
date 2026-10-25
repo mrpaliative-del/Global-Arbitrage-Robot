@@ -1,4 +1,3 @@
-
 """Small standard-library web wrapper for the SolveEase research prototype.
 
 This is a dashboard and manual trigger, not a continuous worker or a trading
@@ -619,22 +618,44 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main() -> None:
-    """Start the HTTP server using Render's assigned port."""
-    Path(DB_PATH).parent.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
+    """Start the HTTP server and select a writable SQLite location."""
+    global DB_PATH
 
-    server = ThreadingHTTPServer(
-        (HOST, PORT),
-        Handler,
-    )
+    configured_path = DB_PATH
+
+    try:
+        database = Path(configured_path)
+        database.parent.mkdir(parents=True, exist_ok=True)
+
+        # Verify that the database directory is writable.
+        probe = database.parent / ".solveease_write_test"
+        probe.touch(exist_ok=True)
+        probe.unlink(missing_ok=True)
+
+    except OSError as exc:
+        print(
+            f"[SolveEase] Database path {configured_path!r} is not "
+            f"writable: {exc}. Falling back to a local database.",
+            flush=True,
+        )
+
+        DB_PATH = "solveease_ledger.sqlite3"
+
+        try:
+            Path(DB_PATH).parent.mkdir(parents=True, exist_ok=True)
+        except OSError as fallback_exc:
+            raise RuntimeError(
+                f"Cannot prepare fallback database path {DB_PATH!r}: "
+                f"{fallback_exc}"
+            ) from fallback_exc
+
+    server = ThreadingHTTPServer((HOST, PORT), Handler)
 
     print(
-        f"SolveEase dashboard v{APP_VERSION} listening "
-        f"on {HOST}:{PORT}",
+        f"SolveEase dashboard v{APP_VERSION} listening on {HOST}:{PORT}",
         flush=True,
     )
+    print(f"[SolveEase] SQLite database path: {DB_PATH}", flush=True)
 
     try:
         server.serve_forever()
