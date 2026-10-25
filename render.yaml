@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: solveease-global-arbitrage
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    healthCheckPath: /health
+    envVars:
+      - key: SOLVEEASE_DB_PATH
+        value: solveease_ledger.sqlite3
+      - key: SOLVEEASE_RUN_TOKEN
+        generateValue: true
