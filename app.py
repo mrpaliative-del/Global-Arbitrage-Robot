@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import hmac
@@ -202,6 +201,18 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("X-Content-Type-Options", "nosniff")
         self.end_headers()
         self.wfile.write(body)
+
+    def do_HEAD(self):
+        path = urlparse(self.path).path
+
+        if path in ("/", "/index.html", "/health"):
+            self.send_response(200)
+        else:
+            self.send_response(404)
+
+        self.send_header("Content-Length", "0")
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
 
     def do_GET(self):
         path = urlparse(self.path).path
