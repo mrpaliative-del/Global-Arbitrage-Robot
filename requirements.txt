@@ -1,1 +1,2 @@
 # Standard-library-only runtime. No pip dependencies required.
+psycopg[binary]>=3.2,<4
