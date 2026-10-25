@@ -9,7 +9,7 @@ from pathlib import Path
 from . import sources
 from .economics import screen
 from .models import Opportunity, utc_now_iso
-from .store import SQLiteLedger
+from .store import create_ledger
 
 
 def stable_id(source: str, record: dict) -> str:
@@ -63,13 +63,12 @@ def discover():
 
 
 def run_scan():
-    db_path = (
-        os.environ.get("SOLVEEASE_DB_PATH")
-        or os.environ.get("TASK_GAP_DB")
-        or "solveease_ledger.sqlite3"
+    ledger = create_ledger()
+    database_name = (
+        "Neon PostgreSQL"
+        if ledger.backend == "postgres"
+        else str(ledger.path.resolve())
     )
-
-    ledger = SQLiteLedger(db_path)
     records, source_status = discover()
 
     seen = set()
@@ -121,7 +120,8 @@ def run_scan():
         report = {
             "status": "complete",
             "generated_at": utc_now_iso(),
-            "database": str(Path(db_path).resolve()),
+            "database": database_name,
+            "database_backend": ledger.backend,
             "sources": source_status,
             "records_received": len(records),
             "unique_records_processed": len(seen),
