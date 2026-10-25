@@ -1,4 +1,3 @@
-
 """Small public API connectors; source errors are surfaced to the scanner."""
 from __future__ import annotations
 
@@ -6,6 +5,8 @@ import json
 import os
 import urllib.parse
 import urllib.request
+import urllib.error
+import xml.etree.ElementTree as ET
 
 UA = (
     "SolveEaseOpportunityResearch/2.1 "
@@ -21,10 +22,21 @@ def _get_json(url, timeout=15):
             "Accept": "application/json",
         },
     )
-    with urllib.request.urlopen(req, timeout=timeout) as response:
-        if response.status != 200:
-            raise RuntimeError(f"HTTP {response.status}")
-        return json.loads(response.read().decode("utf-8", "replace"))
+
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as response:
+            body = response.read().decode("utf-8", "replace")
+            if response.status != 200:
+                raise RuntimeError(
+                    f"HTTP {response.status}: {body[:1000]}"
+                )
+            return json.loads(body)
+
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", "replace")
+        raise RuntimeError(
+            f"HTTP {exc.code}: {detail[:1000]}"
+        ) from exc
 
 
 def _post_json(url, payload, timeout=20):
