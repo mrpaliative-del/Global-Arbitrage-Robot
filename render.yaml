@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: global-arbitrage-robot
+    runtime: python
+    plan: free
+    buildCommand: "python -m compileall -q ."
+    startCommand: "python app.py"
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.11
+      - key: SOLVEEASE_DB_PATH
+        value: /var/data/solveease_ledger.sqlite3
+      - key: SOLVEEASE_RUN_TOKEN
+        generateValue: true
+    disk:
+      name: solveease-ledger
+      mountPath: /var/data
+      sizeGB: 1
